@@ -1,5 +1,5 @@
 import comments from '../data/comments.mjs';
-
+import error from '../utiities/error.mjs';
 
 function allComments(req,res){
     const {userId } = req.query;
@@ -15,11 +15,47 @@ function allComments(req,res){
     res.json(comments);
 }
 function specificComment(req,res,next){
-    const user = comments.find((c)=> c.id ==req.params.id)
-    if (user)
-        res.json(user);
-    else
-        next();
+    const postId = req.params.postId;
+    const userId = req.params.userId;
+    // checking any postId passes (/posts/:postId/comments)
+    if(postId){
+        const {userId} = req.query;
+        // checking if any userId query is passed (/posts/:id/comments?userId=)
+        if(userId){
+            const commentByUserPost = comments.filter((c)=> c.postId == postId && c.userId == userId);
+            if(commentByUserPost.length > 0)
+                return res.json(commentByUserPost);
+            return next(error(404,`user doesnt have any comments on post`));    
+        }
+        // if no query string userId is passed
+        const commentByPost = comments.filter((c)=>c.postId == postId);
+        if(commentByPost.length > 0)
+            return res.json(commentByPost)
+        return res.next(error(404,"No Comments found on the given post for specific user"));
+    }
+
+    // checking if any userid is passed (/users/:userId/comments)
+    if(userId){
+        const {postId} = req.query;
+        // checking if any qeury string postId is set(/users/:userId/comments?postId=)
+        if(postId){
+            const commentsForuserSpecificPost = comments.filter((c)=>c.userId == userId && c.postId == postId);
+            if(commentsForuserSpecificPost.length > 0)
+                return res.json(commentsForuserSpecificPost);
+            return next(error(404,`No comments found for the given user on specific post`))
+        }
+
+        // if no query string postId is passed
+        const commentByUser = comments.filter((c)=>c.userId == userId);
+        if(commentByUser.length > 0)
+            return res.json(commentByUser)
+        return res.next(error(404,"No Comments found on the given User"));
+    }
+    //This code for getting comments based on comment Id
+    const comment = comments.find((c)=> c.id ==req.params.id)
+    if (comment)
+        return res.json(comment);
+    next();
 }
 function createComment(req,res){
     if(req.body.id && req.body.userId && req.body.postId && req.body.body ){
@@ -66,7 +102,7 @@ function deleteComment(req,res,next){
     if(comment){
         res.json(comment)
     }else
-        next(error(404,"Comment not found"));
+        next( error(404,"Comment not found"));
 }
 
 // function getAllComments(req,res){

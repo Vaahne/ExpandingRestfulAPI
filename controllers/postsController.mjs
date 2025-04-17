@@ -18,7 +18,7 @@ function createPost(req,res){
 }
 
 function allPosts(req,res){
-    const {userId} = req.query;
+    const {userId} = req.query; // if any query is passed with userId as parameter
     console.log(userId);
     if(userId){
         const userSpecificPosts = posts.filter((p)=>p.userId == userId);
