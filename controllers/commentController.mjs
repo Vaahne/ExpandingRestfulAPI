@@ -4,6 +4,7 @@ import error from '../utiities/error.mjs';
 function allComments(req,res){
     const {userId } = req.query;
     const {postId } = req.query;
+
     if(userId){
         const specificComments = comments.filter((c)=>c.userId == userId);
         return res.json(specificComments);
@@ -14,9 +15,11 @@ function allComments(req,res){
     }
     res.json(comments);
 }
+
 function specificComment(req,res,next){
     const postId = req.params.postId;
     const userId = req.params.userId;
+
     // checking any postId passes (/posts/:postId/comments)
     if(postId){
         const {userId} = req.query;
@@ -51,6 +54,7 @@ function specificComment(req,res,next){
             return res.json(commentByUser)
         return res.next(error(404,"No Comments found on the given User"));
     }
+
     //This code for getting comments based on comment Id
     const comment = comments.find((c)=> c.id ==req.params.id)
     if (comment)
@@ -59,23 +63,22 @@ function specificComment(req,res,next){
 }
 function createComment(req,res){
     if(req.body.id && req.body.userId && req.body.postId && req.body.body ){
+    
         if(comments.find((c) =>c.id == req.body.id )){
             res.json({err:"Already found"});
             return;
         }
+    
         const comment = {
             id: comments[comments.length - 1].id + 1,
             userId: req.body.userId,
             postId: req.body.postId,
             body: req.body.body,
           };
-          comments.push(comment); //pushing obj to DB
-          res.json(comments[comments.length - 1]);
-       
-    }else{
-        res.json({err:"Insuffiencent data"})
-        return;
-    }
+        comments.push(comment); //pushing obj to DB
+        res.json(comments[comments.length - 1]);       
+    }else
+        return res.json({err:"Insuffiencent data"});    
 }
 function updateComment(req,res,next){
     const comment = comments.find((u,i)=>{
@@ -92,6 +95,7 @@ function updateComment(req,res,next){
         next(error(404,"Comment not found"));
 
 }
+
 function deleteComment(req,res,next){
     const comment = comments.find((u,i)=>{
         if(u.id == req.params.id){
@@ -104,10 +108,6 @@ function deleteComment(req,res,next){
     }else
         next( error(404,"Comment not found"));
 }
-
-// function getAllComments(req,res){
-//     postsController.getPostsByUser(req,res);
-// }
 
 
 export default {allComments,deleteComment,updateComment,specificComment,createComment};

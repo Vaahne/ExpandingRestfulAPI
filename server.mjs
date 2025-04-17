@@ -16,7 +16,6 @@ app.use('/comments',commentRoutes);
 // Middleware
 // Routes
 app.get('/api/users/:id/posts',userRoutes);
-
 app.get('/posts/:postId/comments',commentRoutes);
 app.get('/users/:userId/comments',commentRoutes);
 
